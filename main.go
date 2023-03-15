@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 	"net/http"
-	"net/url"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-var baseURL string = "https://kr.indeed.com/jobs?q=python&limit=50"
+// var baseURL string = "https://kr.indeed.com/jobs?q=python&limit=50"
+var baseURL string = "https://www.saramin.co.kr/zf_user/search/recruit?&searchword=python"
 
 func main() {
 	getPages()
@@ -16,13 +16,30 @@ func main() {
 }
 
 func getPages() int {
-	req, rErr := http.NewRequest("GET", baseURL, nil)
-	checkErr(rErr)
+	// req, rErr := http.NewRequest("GET", baseURL, nil)
+	// checkErr(rErr)
 
 	// 프록시로 호출
-	purl, err := url.Parse(baseURL)
-	client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(purl)}}
-	res, err := client.Do(req)
+	// purl, err := url.Parse(baseURL)
+	// client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(purl)}}
+
+	// res, err := client.Do(req)
+	// checkErr(err)
+	// checkCode(res)
+
+	// defer res.Body.Close()
+
+	// doc, err := goquery.NewDocumentFromReader(res.Body)
+	// checkErr(err)
+
+	// fmt.Println(doc)
+
+	// doc.Find(".pagination").Each(func(i int, s *goquery.Selection) {
+	// 	fmt.Println(s.Html())
+
+	// })
+
+	res, err := http.Get(baseURL)
 	checkErr(err)
 	checkCode(res)
 
