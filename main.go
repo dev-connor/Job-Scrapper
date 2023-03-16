@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -23,12 +25,32 @@ func main() {
 	var jobs []extractedJob
 	totalPages := getPages()
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < totalPages; i++ {
 		extractedJobs := getPage(i)
 		jobs = append(jobs, extractedJobs...)
 	}
-	fmt.Println(jobs)
-	fmt.Println(totalPages)
+	writeJobs(jobs)
+	fmt.Println("Done, extracted", len(jobs))
+
+}
+
+func writeJobs(jobs []extractedJob) {
+	file, err := os.Create("jobs.csv")
+	checkErr(err)
+
+	w := csv.NewWriter(file)
+	defer w.Flush()
+
+	headers := []string{"ID", "Title", "Location", "Summary"}
+
+	wErr := w.Write(headers)
+	checkErr(wErr)
+
+	for _, job := range jobs {
+		jobSlice := []string{"https://www.saramin.co.kr/zf_user/jobs/relay/view?isMypage=no&recommend_ids=eJxFj8kVw0AIQ6vJHQFiOacQ999FZuyMOf4nISEnGll6FfDJrxulVbiwN3qwGRtjI8EGeqHcqAEzuUr7UWNl9SCq3E8yVcwsTzLhjnx7iYKnzW11ZRzVq1LbxuzO8vnKYrlHbUXL9BaNMapFxpgl7Fn0NwfT8Pa2aPqejx9jukA7&view_type=search&searchword=python&searchType=search&gz=1&t_ref_content=generic&t_ref=search&paid_fl=n&rec_idx=" + job.id, job.title, job.location, job.summary}
+		jwErr := w.Write(jobSlice)
+		checkErr(jwErr)
+	}
 
 }
 
@@ -92,7 +114,7 @@ func extractJob(card *goquery.Selection) extractedJob {
 	title := cleanString(card.Find(".job_tit").Text())
 	location := cleanString(card.Find(".job_condition").Text())
 	summary := cleanString(card.Find(".job_sector").Text())
-	fmt.Println(id, title, location, summary)
+
 	return extractedJob{
 		id:       id,
 		title:    title,
