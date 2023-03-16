@@ -23,38 +23,25 @@ var baseURL string = "https://www.saramin.co.kr/zf_user/search/recruit?keydownAc
 
 func main() {
 	var jobs []extractedJob
+	c := make(chan []extractedJob)
 	totalPages := getPages()
 
 	for i := 0; i < totalPages; i++ {
-		extractedJobs := getPage(i)
-		jobs = append(jobs, extractedJobs...)
+		go getPage(i, c)
 	}
+
+	for i := 0; i < totalPages; i++ {
+		extractedJob := <-c
+		jobs = append(jobs, extractedJob...)
+
+	}
+
 	writeJobs(jobs)
 	fmt.Println("Done, extracted", len(jobs))
 
 }
 
-func writeJobs(jobs []extractedJob) {
-	file, err := os.Create("jobs.csv")
-	checkErr(err)
-
-	w := csv.NewWriter(file)
-	defer w.Flush()
-
-	headers := []string{"ID", "Title", "Location", "Summary"}
-
-	wErr := w.Write(headers)
-	checkErr(wErr)
-
-	for _, job := range jobs {
-		jobSlice := []string{"https://www.saramin.co.kr/zf_user/jobs/relay/view?isMypage=no&recommend_ids=eJxFj8kVw0AIQ6vJHQFiOacQ999FZuyMOf4nISEnGll6FfDJrxulVbiwN3qwGRtjI8EGeqHcqAEzuUr7UWNl9SCq3E8yVcwsTzLhjnx7iYKnzW11ZRzVq1LbxuzO8vnKYrlHbUXL9BaNMapFxpgl7Fn0NwfT8Pa2aPqejx9jukA7&view_type=search&searchword=python&searchType=search&gz=1&t_ref_content=generic&t_ref=search&paid_fl=n&rec_idx=" + job.id, job.title, job.location, job.summary}
-		jwErr := w.Write(jobSlice)
-		checkErr(jwErr)
-	}
-
-}
-
-func getPage(page int) []extractedJob {
+func getPage(page int, mainC chan<- []extractedJob) {
 	var jobs []extractedJob
 	c := make(chan extractedJob)
 	pageURL := baseURL + "&recruitPage=" + strconv.Itoa(page+1)
@@ -80,8 +67,7 @@ func getPage(page int) []extractedJob {
 
 	}
 
-	return jobs
-
+	mainC <- jobs
 }
 
 func getPages() int {
@@ -101,6 +87,26 @@ func getPages() int {
 	})
 
 	return pages
+}
+
+func writeJobs(jobs []extractedJob) {
+	file, err := os.Create("jobs.csv")
+	checkErr(err)
+
+	w := csv.NewWriter(file)
+	defer w.Flush()
+
+	headers := []string{"ID", "Title", "Location", "Summary"}
+
+	wErr := w.Write(headers)
+	checkErr(wErr)
+
+	for _, job := range jobs {
+		jobSlice := []string{"https://www.saramin.co.kr/zf_user/jobs/relay/view?isMypage=no&recommend_ids=eJxFj8kVw0AIQ6vJHQFiOacQ999FZuyMOf4nISEnGll6FfDJrxulVbiwN3qwGRtjI8EGeqHcqAEzuUr7UWNl9SCq3E8yVcwsTzLhjnx7iYKnzW11ZRzVq1LbxuzO8vnKYrlHbUXL9BaNMapFxpgl7Fn0NwfT8Pa2aPqejx9jukA7&view_type=search&searchword=python&searchType=search&gz=1&t_ref_content=generic&t_ref=search&paid_fl=n&rec_idx=" + job.id, job.title, job.location, job.summary}
+		jwErr := w.Write(jobSlice)
+		checkErr(jwErr)
+	}
+
 }
 
 func checkErr(err error) {
