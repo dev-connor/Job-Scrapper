@@ -1,9 +1,12 @@
 package main
 
 import (
-	"Job-Scrapper/scrapper"
+	"Job-Scrapper/app"
+	"Job-Scrapper/pkg"
+	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,8 +19,15 @@ func handleHome(c echo.Context) error {
 
 func handleScrape(c echo.Context) error {
 	defer os.Remove(fileName)
-	term := strings.ToLower(scrapper.CleanString(c.FormValue("term")))
-	scrapper.Scrape(term)
+
+	startTime := time.Now()
+	term := strings.ToLower(app.CleanString(c.FormValue("term")))
+	app.Scrape(term)
+
+	endTime := time.Now()
+	duration := pkg.TimeToKo(endTime.Sub(startTime))
+	fmt.Printf("CSV 파일을 다운로드하는데 %s 걸렸습니다.\n", duration)
+
 	return c.Attachment(fileName, fileName)
 }
 
