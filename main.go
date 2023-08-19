@@ -23,9 +23,10 @@ func handleScrape(c echo.Context) error {
 
 func main() {
 	e := echo.New()
-	// e.GET()
+
 	e.GET("/", handleHome)
 	e.POST("/scrape", handleScrape)
+
 	e.Logger.Fatal(e.Start(":1323"))
 
 }
