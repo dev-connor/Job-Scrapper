@@ -4,4 +4,3 @@
 
 <img width="1792" alt="image" src="https://github.com/dev-connor/Job-Scrapper/assets/70655507/05ca84d9-4bd4-4cab-a76f-428b3c83e8fe">
 
-![image](https://github.com/dev-connor/Job-Scrapper/assets/70655507/03091968-a572-4680-a51c-75e72fd9266a)
